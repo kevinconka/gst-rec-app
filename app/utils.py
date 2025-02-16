@@ -15,6 +15,8 @@ def ensure_recordings_directory(path: str) -> None:
     path : str
         Path to the recordings directory
     """
+    if not path:
+        path = str(Path.home())
     Path(path).mkdir(parents=True, exist_ok=True)
 
 
@@ -26,7 +28,7 @@ def get_storage_info() -> StorageInfo:
     StorageInfo
         Storage usage details for the recordings directory
     """
-    path = settings.get_value("default_path")
+    path = settings.get_value("default_path") or str(Path.home())
     ensure_recordings_directory(path)
 
     total, used, free = shutil.disk_usage(path)

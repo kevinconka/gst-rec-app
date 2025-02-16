@@ -4,12 +4,14 @@ This module defines the routes for the application, including the main index pag
 API endpoints for settings, storage, sensors, and recordings.
 """
 
+import os
 from dataclasses import asdict
 from pathlib import Path
 
 from flask import Blueprint, jsonify, render_template, request
 
 from app.models import settings
+from app.services.filesystem import list_directory
 from app.services.recording import get_recording_status, start_recording, stop_recording
 from app.services.recordings import get_recordings
 from app.utils import get_sensors_status, get_storage_info
@@ -130,3 +132,35 @@ def get_recording_status_route():
     """
     result = get_recording_status(settings)
     return jsonify(result)
+
+
+@main.route("/api/browse", methods=["GET"])
+def browse_filesystem():
+    """Browse the file system.
+
+    Returns
+    -------
+        Response: JSON response containing directory listing.
+    """
+    try:
+        path = request.args.get("path")
+        print(f"Browsing path: {path}")  # Debug log
+
+        if path:
+            print(f"Absolute path: {os.path.abspath(path)}")  # Debug log
+            print(f"Path exists: {os.path.exists(path)}")  # Debug log
+            print(f"Is directory: {os.path.isdir(path)}")  # Debug log
+            try:
+                print(f"Readable: {os.access(path, os.R_OK)}")  # Debug log
+            except Exception as e:
+                print(f"Error checking access: {e}")  # Debug log
+
+        entries = list_directory(path)
+        print(f"Found entries: {len(entries)}")  # Debug log
+        return jsonify([asdict(entry) for entry in entries])
+    except Exception as e:
+        error_msg = f"Error in browse_filesystem: {str(e)}"
+        print(error_msg)  # Debug log
+        return jsonify(
+            {"error": "Access denied", "details": error_msg, "path": path}
+        ), 403

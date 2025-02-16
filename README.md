@@ -59,7 +59,7 @@ uv pip install .
 2. Run with Gunicorn:
 
 ```bash
-gunicorn -c gunicorn.conf.py app.wsgi:app
+gunicorn -c "$(python -c 'import app; print(app.__path__[0])')/gunicorn_conf.py" app.wsgi:app
 ```
 
 ### Gunicorn Configuration

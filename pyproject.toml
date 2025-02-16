@@ -1,17 +1,28 @@
 [project]
 name = "gst-rec-app"
-version = "0.1.0"
-description = "Add your description here"
+dynamic = ['version']
+description = "GST Recording Application"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = ["flask", "flask-cors>=5.0.0", "gunicorn", "psutil>=7.0.0"]
 
 [project.scripts]
-gst-rec-dev = "dev:app.run"
+gst-rec = "gst_rec_app.cli:run_prod"    # Production server
+gst-rec-dev = "gst_rec_app.cli:run_dev" # Development server
 
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = { attr = "gst_rec_app.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gst_rec_app*"]
+
+[tool.setuptools.package-data]
+gst_rec_app = ["templates/*", "static/**/*"]
 
 # Pylint settings
 [tool.pylint]

@@ -7,8 +7,8 @@ It includes functionality to start/stop recordings and check recording status.
 import time
 from typing import Dict
 
-from app.models.responses import ApiResponse
-from app.models.settings import Settings
+from gst_rec_app.models.responses import ApiResponse
+from gst_rec_app.models.settings import Settings
 
 
 def start_recording(settings: Settings) -> ApiResponse:

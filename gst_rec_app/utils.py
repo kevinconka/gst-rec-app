@@ -3,8 +3,8 @@
 import shutil
 from pathlib import Path
 
-from app.models import settings
-from app.models.responses import StorageInfo
+from gst_rec_app.models import settings
+from gst_rec_app.models.responses import StorageInfo
 
 
 def ensure_recordings_directory(path: str) -> None:

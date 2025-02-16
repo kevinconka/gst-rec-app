@@ -1,5 +1,5 @@
 """WSGI application entry point."""
 
-from app import create_app
+from gst_rec_app import create_app
 
 app = create_app()

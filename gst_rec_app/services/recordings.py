@@ -6,7 +6,7 @@ It includes functionality to list recordings and their metadata.
 
 from datetime import datetime
 
-from app.models.responses import Recording, RecordingsResponse
+from gst_rec_app.models.responses import Recording, RecordingsResponse
 
 
 def get_recordings() -> RecordingsResponse:

@@ -1,5 +1,7 @@
 """Flask application initialization."""
 
+__version__ = "0.1.0"
+
 from flask import Flask, Response
 from flask_cors import CORS
 
@@ -29,7 +31,7 @@ def create_app():
         return response
 
     # Register blueprints
-    from app.routes import main
+    from gst_rec_app.routes import main
 
     app.register_blueprint(main)
 

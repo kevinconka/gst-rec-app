@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const timer = document.getElementById("timer");
   let isRecording = false;
   let timerInterval;
-  let seconds = 0;
+  let startTime;
   const logContainer = document.getElementById("log-container");
 
   // Initialize data
@@ -12,11 +12,32 @@ document.addEventListener("DOMContentLoaded", function () {
   updateRecordingHistory();
 
   // Event listeners
-  recordBtn.addEventListener("click", function () {
-    if (!isRecording) {
-      startRecording();
-    } else {
-      stopRecording();
+  recordBtn.addEventListener("click", async () => {
+    const recordText = recordBtn.querySelector(".record-text");
+    const loadingText = recordBtn.querySelector(".loading-text");
+
+    // Show loading state
+    recordText.classList.add("hidden");
+    loadingText.classList.remove("hidden");
+    loadingText.textContent = isRecording ? "Stopping..." : "Starting...";
+
+    try {
+      if (isRecording) {
+        await stopRecording();
+      } else {
+        await startRecording();
+      }
+      isRecording = !isRecording;
+    } catch (error) {
+      console.error("Recording action failed:", error);
+      addLog(
+        `Failed to ${isRecording ? "stop" : "start"} recording: ${
+          error.message
+        }`,
+        "error",
+      );
+      // Reset button state
+      updateRecordingState(isRecording);
     }
   });
 
@@ -56,61 +77,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function startRecording() {
     try {
-      // Update button state
-      const recordText = recordBtn.querySelector(".record-text");
-      const loadingText = recordBtn.querySelector(".loading-text");
-      recordBtn.disabled = true;
-      recordText.classList.add("hidden");
-      loadingText.textContent = "Starting...";
-      loadingText.classList.remove("hidden");
-
-      addLog("Initializing recording...", "info");
-
-      const response = await fetch("/api/start_recording", {
+      const response = await fetch("/api/recording/start", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          save_path: document.getElementById("current-path").textContent,
-        }),
       });
 
       const data = await response.json();
-
-      if (data.status === "recording") {
-        isRecording = true;
-        recordText.textContent = "Stop";
-        recordBtn.classList.replace("bg-blue-500", "bg-red-500");
-        recordBtn.classList.replace("hover:bg-blue-600", "hover:bg-red-600");
-        timer.classList.remove("hidden");
+      if (data.status === "success") {
+        addLog("Recording started", "success");
+        updateRecordingState(true);
         startTimer();
-        addLog("Recording started successfully", "success");
+      } else {
+        throw new Error(data.message || "Failed to start recording");
       }
     } catch (error) {
-      console.error("Error:", error);
-      addLog("Failed to start recording: " + error.message, "error");
-    } finally {
-      // Reset button state
-      recordBtn.disabled = false;
-      recordBtn.querySelector(".loading-text").classList.add("hidden");
-      recordBtn.querySelector(".record-text").classList.remove("hidden");
+      console.error("Recording error:", error);
+      addLog(`Failed to start recording: ${error.message}`, "error");
+      updateRecordingState(false);
     }
   }
 
   async function stopRecording() {
     try {
-      // Update button state
-      const recordText = recordBtn.querySelector(".record-text");
-      const loadingText = recordBtn.querySelector(".loading-text");
-      recordBtn.disabled = true;
-      recordText.classList.add("hidden");
-      loadingText.textContent = "Stopping...";
-      loadingText.classList.remove("hidden");
-
-      addLog("Stopping recording...", "info");
-
-      const response = await fetch("/api/stop_recording", {
+      const response = await fetch("/api/recording/stop", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -118,51 +109,56 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       const data = await response.json();
-
-      if (data.status === "stopped") {
-        isRecording = false;
-        recordText.textContent = "Record";
-        recordBtn.classList.replace("bg-red-500", "bg-blue-500");
-        recordBtn.classList.replace("hover:bg-red-600", "hover:bg-blue-600");
+      if (data.status === "success") {
+        addLog("Recording stopped", "success");
+        updateRecordingState(false);
         stopTimer();
-        updateRecordingHistory();
-        addLog("Recording stopped successfully", "success");
+      } else {
+        throw new Error(data.message || "Failed to stop recording");
       }
     } catch (error) {
-      console.error("Error:", error);
-      addLog("Failed to stop recording: " + error.message, "error");
-    } finally {
-      // Reset button state
-      recordBtn.disabled = false;
-      recordBtn.querySelector(".loading-text").classList.add("hidden");
-      recordBtn.querySelector(".record-text").classList.remove("hidden");
+      console.error("Recording error:", error);
+      addLog(`Failed to stop recording: ${error.message}`, "error");
     }
   }
 
+  function updateRecordingState(isRecording) {
+    const recordBtn = document.getElementById("record-btn");
+    const recordText = recordBtn.querySelector(".record-text");
+    const loadingText = recordBtn.querySelector(".loading-text");
+    const timer = recordBtn.querySelector("#timer");
+
+    recordText.textContent = isRecording ? "Stop" : "Record";
+    recordBtn.classList.toggle("bg-red-500", isRecording);
+    recordBtn.classList.toggle("hover:bg-red-600", isRecording);
+    recordBtn.classList.toggle("bg-blue-500", !isRecording);
+    recordBtn.classList.toggle("hover:bg-blue-600", !isRecording);
+
+    loadingText.classList.add("hidden");
+    recordText.classList.remove("hidden");
+    timer.classList.toggle("hidden", !isRecording);
+  }
+
   function startTimer() {
-    seconds = 0;
-    updateTimerDisplay();
-    timer.classList.remove("hidden");
-    setTimeout(() => {
-      timer.classList.add("fade-in");
-    }, 10);
-    timerInterval = setInterval(updateTimerDisplay, 1000);
+    startTime = Date.now();
+    const timerElement = document.getElementById("timer");
+    timerInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const seconds = Math.floor(elapsed / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const displaySeconds = (seconds % 60).toString().padStart(2, "0");
+      const displayMinutes = minutes.toString().padStart(2, "0");
+      timerElement.textContent = `${displayMinutes}:${displaySeconds}`;
+    }, 1000);
   }
 
   function stopTimer() {
-    clearInterval(timerInterval);
-    seconds = 0;
-    timer.classList.remove("fade-in");
-    timer.classList.add("hidden");
-  }
-
-  function updateTimerDisplay() {
-    seconds++;
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    timer.textContent = `${minutes}:${remainingSeconds
-      .toString()
-      .padStart(2, "0")}`;
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    const timerElement = document.getElementById("timer");
+    timerElement.textContent = "00:00";
   }
 
   function updateSensors() {
@@ -196,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <div class="bg-blue-600 h-2 rounded-full" style="width: ${data.percent}%"></div>
                     </div>
                     <div class="text-sm text-gray-600">
-                        Available: ${usedGB}GB / ${totalGB}GB
+                        Used: ${usedGB}GB / ${totalGB}GB
                     </div>
                 `;
       });

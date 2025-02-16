@@ -12,7 +12,11 @@ from flask import Blueprint, jsonify, render_template, request
 
 from app.models import settings
 from app.services.filesystem import list_directory
-from app.services.recording import get_recording_status, start_recording, stop_recording
+from app.services.recording import (
+    get_recording_status,
+    start_recording,
+    stop_recording,
+)
 from app.services.recordings import get_recordings
 from app.utils import get_sensors_status, get_storage_info
 

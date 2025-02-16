@@ -1,10 +1,8 @@
 {% extends "base.html" %} {% block content %}
 <div class="container mx-auto p-6 max-w-6xl">
-  <h1 class="text-2xl font-bold mb-6">GST Recording Studio</h1>
-
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Sensors Panel -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6 border">
       <h2 class="text-xl font-semibold mb-4">Available Sensors</h2>
       <div id="sensors-list" class="space-y-2">
         <!-- Dynamically populated -->
@@ -13,7 +11,7 @@
 
     <!-- Recording Control -->
     <div
-      class="bg-white rounded-lg shadow p-6 text-center flex flex-col h-full"
+      class="bg-white rounded-lg shadow p-6 border text-center flex flex-col h-full"
     >
       <button
         id="record-btn"
@@ -28,7 +26,7 @@
     </div>
 
     <!-- Storage Status -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6 border">
       <h2 class="text-xl font-semibold mb-4">Storage Status</h2>
       <div id="storage-info">
         <!-- Dynamically populated -->
@@ -36,9 +34,9 @@
     </div>
 
     <!-- Save Path -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6 border">
       <h2 class="text-xl font-semibold mb-4">Save Location</h2>
-      <div class="bg-gray-100 p-3 rounded mb-4" id="current-path">
+      <div class="bg-gray-100 p-3 rounded mb-4 border" id="current-path">
         {{ default_path }}
       </div>
       <button
@@ -51,11 +49,11 @@
   </div>
 
   <!-- Logging Panel -->
-  <div class="bg-white rounded-lg shadow p-6 mt-6 mb-6">
+  <div class="bg-white rounded-lg shadow p-6 mt-6 mb-6 border">
     <h2 class="text-xl font-semibold mb-4">System Logs</h2>
     <div
       id="log-container"
-      class="h-32 overflow-y-auto bg-gray-50 p-4 rounded font-mono text-sm space-y-1"
+      class="h-32 overflow-y-auto p-4 rounded font-mono text-sm space-y-1"
     >
       <!-- Logs will be added here dynamically -->
       <div class="text-gray-500">System ready...</div>
@@ -63,7 +61,7 @@
   </div>
 
   <!-- Recording History -->
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="bg-white rounded-lg shadow p-6 border">
     <h2 class="text-xl font-semibold mb-4">Recording History</h2>
     <div id="recording-history" class="space-y-2">
       <!-- Dynamically populated -->
@@ -72,4 +70,5 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/filebrowser.js') }}"></script>
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 {% endblock %}

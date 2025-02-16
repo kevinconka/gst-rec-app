@@ -1,0 +1,28 @@
+[project]
+name = "gst-rec-app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "flask",
+    "gunicorn",
+    "psutil>=7.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+# Pylint settings
+[tool.pylint]
+disable = [
+    "unspecified-encoding",
+    "wrong-import-position",
+    "relative-beyond-top-level",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=3.5.0",
+]

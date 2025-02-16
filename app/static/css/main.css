@@ -1,0 +1,58 @@
+.record-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loading-text,
+.record-text {
+  font-weight: 500;
+}
+
+#timer {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+}
+
+.loading-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.record-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.2s ease;
+}
+
+/* Move record text down when timer is visible */
+#timer:not(.hidden) + .record-text {
+  transform: translate(-50%, 50%);
+  top: 50%;
+}
+
+/* Add fade transition */
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Add these styles at the end of the file */
+#log-container {
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  line-height: 1.4;
+}
+
+.log-entry {
+  transition: background-color 0.2s ease;
+}
+
+.log-entry:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}

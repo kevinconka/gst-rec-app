@@ -29,10 +29,6 @@ exclude = [
     # "tests",
     "venv",
     "*egg-info",
-    # flask
-    "app/static",
-    "app/templates",
-    "app/routes.py",
 ]
 
 line-length = 88

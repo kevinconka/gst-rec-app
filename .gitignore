@@ -173,3 +173,4 @@ cython_debug/
 
 # Application settings
 app/settings.json
+/settings.json

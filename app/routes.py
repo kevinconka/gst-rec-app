@@ -1,69 +1,132 @@
-from flask import Blueprint, render_template, jsonify, request
-from app.utils import get_storage_info, get_sensors_status
-from app.models import settings  # Import the settings instance
-import time
+"""Routes module for the application.
 
-main = Blueprint('main', __name__)
+This module defines the routes for the application, including the main index page,
+API endpoints for settings, storage, sensors, and recordings.
+"""
 
-@main.route('/')
+from dataclasses import asdict
+from pathlib import Path
+
+from flask import Blueprint, jsonify, render_template, request
+
+from app.models import settings
+from app.services.recording import get_recording_status, start_recording, stop_recording
+from app.services.recordings import get_recordings
+from app.utils import get_sensors_status, get_storage_info
+
+main = Blueprint("main", __name__)
+
+
+def get_default_path() -> str:
+    """Get the default recordings path.
+
+    Returns
+    -------
+    str
+        User's home directory path
+    """
+    return str(Path.home())
+
+
+@main.route("/")
 def index():
-    default_path = settings.get_value('default_path', '/default/path')
-    return render_template('index.html', default_path=default_path)
+    """Render the main index page.
 
-@main.route('/api/settings/path', methods=['GET', 'POST'])
+    Returns
+    -------
+        str: Rendered HTML template with default path setting.
+    """
+    path = settings.get_value("default_path") or get_default_path()
+    return render_template("index.html", default_path=path)
+
+
+@main.route("/api/settings/path", methods=["GET", "POST"])
 def settings_path():
-    if request.method == 'POST':
-        new_path = request.json.get('path')
+    """Handle GET and POST requests for the default path setting.
+
+    Returns
+    -------
+        Response: JSON response containing path setting or error message.
+    """
+    if request.method == "POST":
+        new_path = request.json.get("path")
         if new_path:
-            settings.set_value('default_path', new_path)
-            return jsonify({'status': 'success', 'path': new_path})
-        return jsonify({'status': 'error', 'message': 'No path provided'}), 400
+            settings.set_value("default_path", new_path)
+            return jsonify({"status": "success", "path": new_path})
+        return jsonify({"status": "error", "message": "No path provided"}), 400
 
     # GET request
-    path = settings.get_value('default_path', '/default/path')
-    return jsonify({'path': path})
+    path = settings.get_value("default_path") or get_default_path()
+    return jsonify({"path": path})
 
-@main.route('/api/storage')
+
+@main.route("/api/storage")
 def storage():
-    storage_info = get_storage_info()
-    return jsonify(storage_info)
+    """Get storage information.
 
-@main.route('/api/sensors')
+    Returns
+    -------
+        Response: JSON response containing storage usage details.
+    """
+    storage_info = get_storage_info()
+    return jsonify(asdict(storage_info))
+
+
+@main.route("/api/sensors")
 def sensors():
+    """Get sensor status information.
+
+    Returns
+    -------
+        Response: JSON response containing status of all sensors.
+    """
     sensors_status = get_sensors_status()
     return jsonify(sensors_status)
 
-@main.route('/api/recordings')
+
+@main.route("/api/recordings")
 def recordings():
-    recordings = {
-        'recordings': [
-            {
-                'id': 1,
-                'date': '2025-02-16',
-                'duration': '5:30',
-                'size': '2.3 GB',
-                'path': '/recordings/rec_001'
-            }
-        ]
-    }
-    return jsonify(recordings)
+    """Get list of recordings.
 
-@main.route('/api/start_recording', methods=['POST'])
-def start_recording():
-    save_path = request.json.get('save_path')
-    # Simulate initialization delay
-    time.sleep(2)  # 2 second delay
-    return jsonify({
-        'status': 'recording',
-        'save_path': save_path,
-        'message': 'Recording started successfully'
-    })
+    Returns
+    -------
+        Response: JSON response containing list of recording entries.
+    """
+    result = get_recordings()
+    return jsonify(asdict(result))
 
-@main.route('/api/stop_recording', methods=['POST'])
-def stop_recording():
-    # Simulate stopping delay
-    time.sleep(1.5)  # 1.5 second delay
-    return jsonify({
-        'status': 'stopped',
-        'message': 'Recording stopped successfully'
-    })
+
+@main.route("/api/recording/start", methods=["POST"])
+def start_recording_route():
+    """Start a new recording.
+
+    Returns
+    -------
+        Response: JSON response indicating recording start status.
+    """
+    result = start_recording(settings)
+    return jsonify(asdict(result))
+
+
+@main.route("/api/recording/stop", methods=["POST"])
+def stop_recording_route():
+    """Stop the current recording.
+
+    Returns
+    -------
+        Response: JSON response indicating recording stop status.
+    """
+    result = stop_recording(settings)
+    return jsonify(asdict(result))
+
+
+@main.route("/api/recording/status", methods=["GET"])
+def get_recording_status_route():
+    """Get current recording status.
+
+    Returns
+    -------
+        Response: JSON response containing current recording state.
+    """
+    result = get_recording_status(settings)
+    return jsonify(result)

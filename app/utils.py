@@ -1,17 +1,38 @@
 """Utility functions for the application."""
 
-import psutil
+import shutil
+from pathlib import Path
+
+from app.models import settings
+from app.models.responses import StorageInfo
 
 
-def get_storage_info():
-    """Get system storage information.
+def ensure_recordings_directory(path: str) -> None:
+    """Ensure the recordings directory exists.
+
+    Parameters
+    ----------
+    path : str
+        Path to the recordings directory
+    """
+    Path(path).mkdir(parents=True, exist_ok=True)
+
+
+def get_storage_info() -> StorageInfo:
+    """Get storage information for the recordings directory.
 
     Returns
     -------
-        dict: Storage information including used space, total space, and usage percentage.
+    StorageInfo
+        Storage usage details for the recordings directory
     """
-    disk = psutil.disk_usage("/")
-    return {"used": disk.used, "total": disk.total, "percent": disk.percent}
+    path = settings.get_value("default_path")
+    ensure_recordings_directory(path)
+
+    total, used, free = shutil.disk_usage(path)
+    return StorageInfo(
+        total=total, used=used, free=free, percent=round((used / total) * 100, 2)
+    )
 
 
 def get_sensors_status():

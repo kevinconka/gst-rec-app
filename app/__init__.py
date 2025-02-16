@@ -1,8 +1,6 @@
-"""Flask application factory module."""
+"""Flask application initialization."""
 
 from flask import Flask
-
-from config import Config
 
 
 def create_app():
@@ -10,11 +8,12 @@ def create_app():
 
     Returns
     -------
-        Flask: The configured Flask application instance.
+    Flask
+        Configured Flask application instance
     """
     app = Flask(__name__)
-    app.config.from_object(Config)
 
+    # Register blueprints
     from app.routes import main
 
     app.register_blueprint(main)

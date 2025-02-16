@@ -1,4 +1,4 @@
-"""Application entry point."""
+"""Development server entry point."""
 
 from app import create_app
 

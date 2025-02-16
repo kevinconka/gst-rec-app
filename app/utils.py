@@ -47,6 +47,7 @@ def get_sensors_status():
     return {
         "sensors": [
             {"name": "Camera 1", "status": "Connected"},
+            {"name": "Camera 2", "status": "Connected"},
             {"name": "Microphone", "status": "Connected"},
         ]
     }

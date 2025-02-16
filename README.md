@@ -31,17 +31,13 @@ cd gst-rec-app
 uv sync
 ```
 
-3. Run the application:
+## Development
+
+Run the development server:
 
 ```bash
-uv run python3 run.py
+python dev.py
 ```
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
-## Development
 
 The application uses:
 
@@ -49,6 +45,45 @@ The application uses:
 - Tailwind CSS for styling
 - Modern JavaScript (ES6+) for frontend functionality
 - GStreamer for media handling
+
+## Production Deployment
+
+The application is designed to run as a single worker to handle hardware interactions safely.
+
+1. Install the application:
+
+```bash
+uv pip install .
+```
+
+2. Run with Gunicorn:
+
+```bash
+gunicorn -c gunicorn.conf.py app.wsgi:app
+```
+
+### Gunicorn Configuration
+
+The application uses a specialized configuration optimized for hardware interaction:
+
+- Single worker to prevent race conditions
+- Synchronous worker class for predictable hardware access
+- Extended timeouts for long-running recording operations
+- Periodic worker restarts to prevent memory leaks
+
+## API Endpoints
+
+- `GET /`: Main application interface
+- `GET /api/sensors`: List available sensors
+- `GET /api/storage`: Get storage information
+- `POST /api/recording/start`: Start a new recording
+- `POST /api/recording/stop`: Stop current recording
+- `GET /api/recording/status`: Get recording status
+- `GET /api/recordings`: List recorded files
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
 
 ## License
 
